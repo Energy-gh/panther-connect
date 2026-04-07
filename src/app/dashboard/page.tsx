@@ -116,6 +116,11 @@ export default function DashboardPage() {
     if (selAno) query = query.eq("ano_de", parseInt(selAno));
     if (selModelo) query = query.eq("modelo", selModelo);
     const { data } = await query.order("modelo").order("ano_de", { ascending: false });
+    // Se encontrou exatamente 1 resultado, vai direto
+    if (data && data.length === 1) {
+      router.push(`/veiculo/${data[0].id}`);
+      return;
+    }
     setResultados(data || []);
     setLoading(false);
   }
