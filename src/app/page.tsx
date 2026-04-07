@@ -3,6 +3,9 @@
 import { useState } from "react";
 import { createClient } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -23,8 +26,8 @@ export default function LoginPage() {
       if (error) {
         setError(error.message);
       } else {
-        setError("");
         setMode("login");
+        setError("");
         alert("Conta criada! Verifique seu email para confirmar.");
       }
     } else {
@@ -39,63 +42,83 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center px-4">
-      <div className="w-full max-w-sm space-y-6">
+    <div className="flex min-h-screen flex-col items-center justify-center px-4">
+      {/* Ambient glow */}
+      <div className="pointer-events-none fixed left-1/2 top-0 -translate-x-1/2 h-[500px] w-[800px] rounded-full bg-primary/5 blur-[120px]" />
+
+      <div className="relative w-full max-w-sm space-y-8">
+        {/* Brand */}
         <div className="text-center">
-          <h1 className="text-3xl font-bold text-indigo-400">Panther Connect</h1>
-          <p className="mt-2 text-sm text-slate-400">
-            Banco de especificacoes de lubrificantes automotivos
+          <div className="mb-3 inline-flex items-center gap-2">
+            <div className="h-8 w-1 rounded-full bg-primary" />
+            <h1 className="text-2xl font-bold tracking-tight">Panther Connect</h1>
+          </div>
+          <p className="text-sm text-muted-foreground">
+            Inteligencia em lubrificantes automotivos
           </p>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm text-slate-400 mb-1">Email</label>
-            <input
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-5">
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              autoComplete="email"
               placeholder="seu@email.com"
             />
           </div>
-          <div>
-            <label className="block text-sm text-slate-400 mb-1">Senha</label>
-            <input
+
+          <div className="space-y-2">
+            <Label htmlFor="password">Senha</Label>
+            <Input
+              id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
               minLength={6}
-              className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white focus:border-indigo-500 focus:outline-none focus:ring-1 focus:ring-indigo-500"
+              autoComplete={mode === "login" ? "current-password" : "new-password"}
               placeholder="Minimo 6 caracteres"
             />
           </div>
 
-          {error && <p className="text-sm text-red-400">{error}</p>}
+          {error && (
+            <p role="alert" className="text-sm text-destructive">
+              {error}
+            </p>
+          )}
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 disabled:opacity-50 transition-colors"
-          >
-            {loading ? "..." : mode === "login" ? "Entrar" : "Criar conta"}
-          </button>
+          <Button type="submit" disabled={loading} className="w-full" size="lg">
+            {loading ? "Aguarde..." : mode === "login" ? "Entrar" : "Criar conta"}
+          </Button>
         </form>
 
-        <p className="text-center text-sm text-slate-500">
+        {/* Toggle */}
+        <p className="text-center text-sm text-muted-foreground">
           {mode === "login" ? (
             <>
               Nao tem conta?{" "}
-              <button onClick={() => setMode("signup")} className="text-indigo-400 hover:underline">
+              <button
+                type="button"
+                onClick={() => { setMode("signup"); setError(""); }}
+                className="text-primary hover:text-primary/80 font-medium transition-colors"
+              >
                 Criar conta
               </button>
             </>
           ) : (
             <>
               Ja tem conta?{" "}
-              <button onClick={() => setMode("login")} className="text-indigo-400 hover:underline">
+              <button
+                type="button"
+                onClick={() => { setMode("login"); setError(""); }}
+                className="text-primary hover:text-primary/80 font-medium transition-colors"
+              >
                 Entrar
               </button>
             </>

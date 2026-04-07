@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
 
@@ -9,7 +9,20 @@ const geistSans = Geist({
 
 export const metadata: Metadata = {
   title: "Panther Connect",
-  description: "Banco de especificacoes de lubrificantes automotivos do mercado brasileiro",
+  description: "Inteligencia em lubrificantes automotivos",
+  metadataBase: new URL("https://web-luiz-2712s-projects.vercel.app"),
+  openGraph: {
+    title: "Panther Connect",
+    description: "Inteligencia em lubrificantes automotivos",
+    type: "website",
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: "#0a0a0f",
 };
 
 export default function RootLayout({
@@ -18,8 +31,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className={`${geistSans.variable} h-full antialiased dark`}>
-      <body className="min-h-full flex flex-col bg-slate-950 text-slate-100">
+    <html lang="pt-BR" className={`${geistSans.variable} h-full antialiased dark`} suppressHydrationWarning>
+      <body className="min-h-full bg-background text-foreground">
         {children}
       </body>
     </html>
