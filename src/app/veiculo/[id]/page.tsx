@@ -19,7 +19,7 @@ export default function VeiculoPage({ params }: { params: Promise<{ id: string }
   const [produtos, setProdutos] = useState<R[]>([]);
   const [specOem, setSpecOem] = useState<R | null>(null);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState("specs");
+  const [tab, setTab] = useState("resumo");
   const router = useRouter();
   const supabase = createClient();
 
@@ -58,157 +58,302 @@ export default function VeiculoPage({ params }: { params: Promise<{ id: string }
 
   const o = oleo[0] || {};
   const tabs = [
-    { id: "specs", label: "Fluidos" },
+    { id: "resumo", label: "Resumo" },
+    { id: "oleos", label: "Oleos" },
     { id: "filtros", label: "Filtros" },
-    { id: "marcas", label: "Marcas" },
+    { id: "fluidos", label: "Fluidos" },
   ];
+
+  // Build quick info chips
+  const chips: { label: string; value: string; accent?: boolean }[] = [];
+  if (o.viscosidade_sae) chips.push({ label: "SAE", value: o.viscosidade_sae, accent: true });
+  if (o.capacidade_com_filtro_litros) chips.push({ label: "Volume", value: `${o.capacidade_com_filtro_litros}L` });
+  if (o.intervalo_troca_km) chips.push({ label: "Troca", value: `${(o.intervalo_troca_km / 1000)}k km` });
+  if (o.aprovacao_oem) chips.push({ label: "Spec", value: o.aprovacao_oem });
 
   return (
     <>
-      <div className="mx-auto max-w-lg px-5 py-6 pb-24 lg:max-w-2xl lg:px-8 lg:pb-8">
-        {/* Back */}
-        <Link href="/dashboard" className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-6">
-          <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
-          Voltar
-        </Link>
+      <div className="pb-24 lg:pb-0">
+        {/* Hero header — full width, como iFood mostra o restaurante */}
+        <div className="relative bg-gradient-to-b from-foreground/[0.04] to-background px-5 pt-5 pb-6 lg:px-8">
+          <Link href="/dashboard" className="inline-flex items-center justify-center h-9 w-9 rounded-full bg-foreground/5 hover:bg-foreground/10 transition-colors mb-4">
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
+          </Link>
+          <h1 className="text-2xl font-bold capitalize">{v.marca} {v.modelo}</h1>
+          <p className="text-[15px] text-muted-foreground mt-1">
+            {[v.ano_de, v.codigo_motor, v.tipo_cambio].filter(Boolean).join(" · ")}
+          </p>
 
-        {/* Vehicle name */}
-        <h1 className="text-2xl font-bold capitalize">{v.marca} {v.modelo}</h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          {[v.ano_de, v.codigo_motor, v.tipo_cambio].filter(Boolean).join(" · ")}
-        </p>
-
-        {/* Quick summary — uma linha, sem cards */}
-        {o.viscosidade_sae && (
-          <div className="flex items-center gap-3 mt-4 py-3 text-sm">
-            <span className="font-semibold text-primary">{o.viscosidade_sae}</span>
-            <span className="text-muted-foreground/30">|</span>
-            <span>{o.capacidade_com_filtro_litros ? `${o.capacidade_com_filtro_litros}L` : ""}</span>
-            <span className="text-muted-foreground/30">|</span>
-            <span>{o.intervalo_troca_km ? `${(o.intervalo_troca_km / 1000)}k km` : ""}</span>
-            {o.aprovacao_oem && <><span className="text-muted-foreground/30">|</span><span className="text-muted-foreground">{o.aprovacao_oem}</span></>}
-          </div>
-        )}
-
-        {/* Tabs — simples, sem shadcn */}
-        <div className="flex gap-0 mt-4 mb-6 border-b border-foreground/5">
-          {tabs.map((t) => (
-            <button key={t.id} onClick={() => setTab(t.id)}
-              className={`px-4 py-3 text-sm font-medium transition-colors relative ${
-                tab === t.id ? "text-foreground" : "text-muted-foreground/60 hover:text-muted-foreground"
-              }`}>
-              {t.label}
-              {tab === t.id && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-foreground rounded-full" />}
-            </button>
-          ))}
+          {/* Chips — scroll horizontal, como categorias do iFood */}
+          {chips.length > 0 && (
+            <div className="flex gap-2 mt-4 overflow-x-auto -mx-5 px-5 scrollbar-none">
+              {chips.map((c, i) => (
+                <div key={i} className={`shrink-0 px-4 py-2 rounded-full text-[13px] ${
+                  c.accent ? "bg-primary/15 text-primary font-semibold" : "bg-foreground/5 text-foreground"
+                }`}>
+                  <span className="text-muted-foreground/60 mr-1">{c.label}</span>{c.value}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* FLUIDOS */}
-        {tab === "specs" && (
-          <div className="space-y-6">
-            {o.viscosidade_sae && (
-              <Section title="Oleo motor">
-                <Row label="SAE" value={o.viscosidade_sae} />
-                {o.categoria_api && <Row label="API" value={o.categoria_api} />}
-                {o.categoria_acea && <Row label="ACEA" value={o.categoria_acea} />}
-                {o.aprovacao_oem && <Row label="OEM" value={o.aprovacao_oem} />}
-                {o.tipo_base && <Row label="Base" value={o.tipo_base} />}
-                {o.capacidade_com_filtro_litros && <Row label="Capacidade" value={`${o.capacidade_com_filtro_litros}L (com filtro)`} />}
-                {o.intervalo_troca_km && <Row label="Troca" value={`${Number(o.intervalo_troca_km).toLocaleString()} km`} />}
-              </Section>
-            )}
-            {cambio.map((c, i) => (
-              <Section key={i} title={`Cambio ${c.tipo}`}>
-                {c.fluido && <Row label="Fluido" value={c.fluido} />}
-                {c.viscosidade && <Row label="Viscosidade" value={c.viscosidade} />}
-                {c.especificacao && <Row label="Spec" value={c.especificacao} />}
-                {c.capacidade_litros && <Row label="Capacidade" value={`${c.capacidade_litros}L`} />}
-                {c.intervalo_troca_km && <Row label="Troca" value={`${Number(c.intervalo_troca_km).toLocaleString()} km`} />}
-              </Section>
-            ))}
-            {fluidos.map((f, i) => (
-              <Section key={i} title={String(f.tipo).replace("_", " ")}>
-                {(f.fluido || f.especificacao) && <Row label="Tipo" value={f.especificacao || f.fluido} />}
-                {f.capacidade_litros && <Row label="Capacidade" value={`${f.capacidade_litros}L`} />}
-                {f.concentracao && <Row label="Proporcao" value={f.concentracao} />}
-              </Section>
+        {/* Tabs sticky — como abas do iFood */}
+        <div className="sticky top-0 z-30 bg-background/90 backdrop-blur-lg border-b border-foreground/5">
+          <div className="flex gap-0 px-5 lg:px-8 overflow-x-auto scrollbar-none">
+            {tabs.map((t) => (
+              <button key={t.id} onClick={() => setTab(t.id)}
+                className={`shrink-0 px-4 py-3 text-[14px] font-medium transition-colors relative whitespace-nowrap ${
+                  tab === t.id ? "text-foreground" : "text-muted-foreground/50"
+                }`}>
+                {t.label}
+                {tab === t.id && <div className="absolute bottom-0 left-2 right-2 h-0.5 bg-primary rounded-full" />}
+              </button>
             ))}
           </div>
-        )}
+        </div>
 
-        {/* FILTROS */}
-        {tab === "filtros" && (
-          <div className="space-y-6">
-            {filtrosCrossref.length === 0 ? (
-              <p className="text-center text-muted-foreground py-12">Dados nao disponiveis</p>
-            ) : (
-              filtrosCrossref.map((fc, i) => (
-                <Section key={i} title={`Filtro de ${fc.tipo_filtro}`} subtitle={fc.oem_codigo && `OEM ${fc.oem_codigo}`}>
-                  {["tecfil", "mann", "wega", "fram", "mahle"].map((brand) => {
-                    const code = fc[brand];
-                    if (!code) return null;
-                    return <Row key={brand} label={brand.charAt(0).toUpperCase() + brand.slice(1)} value={code} highlight />;
-                  })}
-                </Section>
-              ))
-            )}
-          </div>
-        )}
+        <div className="px-5 py-5 lg:px-8 max-w-lg mx-auto lg:max-w-2xl">
 
-        {/* MARCAS LUBRIFICANTES */}
-        {tab === "marcas" && (
-          <div>
-            {specOem && (
-              <p className="text-sm text-muted-foreground mb-4">
-                Especificacao: <span className="text-foreground font-medium">{specOem.viscosidade} {specOem.oem_aprovacao}</span>
-              </p>
-            )}
-            {produtos.length === 0 ? (
-              <p className="text-center text-muted-foreground py-12">Produtos nao mapeados</p>
-            ) : (
-              <div className="divide-y divide-foreground/5">
-                {produtos.map((p, i) => (
-                  <div key={i} className="flex items-center gap-4 py-4">
-                    {/* Espaco para logo/foto — so mostra quando tiver */}
-                    {p.imagem_url ? (
-                      <img src={p.imagem_url} alt={p.marca} className="h-10 w-10 rounded-lg object-cover" />
-                    ) : (
-                      <div className="h-10 w-10 rounded-lg bg-foreground/5 shrink-0" />
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[13px] text-muted-foreground">{p.marca}</p>
-                      <p className="text-[15px] font-medium truncate">{p.nome_produto}</p>
+          {/* RESUMO — overview visual */}
+          {tab === "resumo" && (
+            <div className="space-y-8">
+              {/* Oleo motor — destaque principal */}
+              {o.viscosidade_sae && (
+                <div>
+                  <h2 className="text-[13px] text-muted-foreground mb-3">Oleo recomendado</h2>
+                  <div className="rounded-2xl bg-foreground/[0.03] p-5">
+                    <p className="text-3xl font-bold text-primary">{o.viscosidade_sae}</p>
+                    <p className="text-[15px] text-muted-foreground mt-1">{o.aprovacao_oem || ""} {o.categoria_api ? `· API ${o.categoria_api}` : ""}</p>
+                    <div className="flex gap-6 mt-4">
+                      {o.capacidade_com_filtro_litros && (
+                        <div>
+                          <p className="text-xl font-bold">{o.capacidade_com_filtro_litros}L</p>
+                          <p className="text-[12px] text-muted-foreground">com filtro</p>
+                        </div>
+                      )}
+                      {o.intervalo_troca_km && (
+                        <div>
+                          <p className="text-xl font-bold">{Number(o.intervalo_troca_km).toLocaleString()}</p>
+                          <p className="text-[12px] text-muted-foreground">km entre trocas</p>
+                        </div>
+                      )}
+                      {o.tipo_base && (
+                        <div>
+                          <p className="text-xl font-bold">{o.tipo_base}</p>
+                          <p className="text-[12px] text-muted-foreground">base</p>
+                        </div>
+                      )}
                     </div>
-                    <span className="text-xs text-muted-foreground/60 shrink-0">{p.viscosidade}</span>
                   </div>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
+                </div>
+              )}
+
+              {/* Produtos — cards visuais estilo iFood */}
+              {produtos.length > 0 && (
+                <div>
+                  <div className="flex justify-between items-center mb-3">
+                    <h2 className="text-[13px] text-muted-foreground">Oleos compativeis</h2>
+                    <button onClick={() => setTab("oleos")} className="text-[13px] text-primary font-medium">Ver todos</button>
+                  </div>
+                  <div className="flex gap-3 overflow-x-auto -mx-5 px-5 pb-2 scrollbar-none">
+                    {produtos.slice(0, 6).map((p, i) => (
+                      <div key={i} className="shrink-0 w-40 rounded-2xl bg-foreground/[0.03] overflow-hidden group cursor-pointer">
+                        <div className="h-28 bg-gradient-to-br from-foreground/[0.04] to-foreground/[0.02] flex items-center justify-center">
+                          {p.imagem_url ? (
+                            <img src={p.imagem_url} alt={p.marca} className="h-20 object-contain" />
+                          ) : (
+                            <div className="h-16 w-8 rounded bg-foreground/[0.04]" />
+                          )}
+                        </div>
+                        <div className="p-3">
+                          <p className="text-[11px] text-muted-foreground">{p.marca}</p>
+                          <p className="text-[13px] font-medium leading-tight mt-0.5 group-hover:text-primary transition-colors line-clamp-2">{p.nome_produto}</p>
+                          <p className="text-[11px] text-muted-foreground/60 mt-1">{p.viscosidade}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Filtros — preview horizontal */}
+              {filtrosCrossref.length > 0 && (
+                <div>
+                  <div className="flex justify-between items-center mb-3">
+                    <h2 className="text-[13px] text-muted-foreground">Filtros compativeis</h2>
+                    <button onClick={() => setTab("filtros")} className="text-[13px] text-primary font-medium">Ver todos</button>
+                  </div>
+                  <div className="flex gap-3 overflow-x-auto -mx-5 px-5 pb-2 scrollbar-none">
+                    {filtrosCrossref.map((fc, i) => (
+                      <div key={i} className="shrink-0 w-36 rounded-2xl bg-foreground/[0.03] p-4">
+                        <p className="text-[11px] text-muted-foreground capitalize">Filtro de {fc.tipo_filtro}</p>
+                        <div className="mt-2 space-y-1.5">
+                          {["tecfil", "mann", "wega"].map((brand) => {
+                            const code = fc[brand];
+                            if (!code) return null;
+                            return (
+                              <div key={brand} className="flex justify-between items-center">
+                                <span className="text-[11px] text-muted-foreground/60 capitalize">{brand}</span>
+                                <span className="text-[12px] font-semibold text-primary">{code}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Fluidos rapido */}
+              {(cambio.length > 0 || fluidos.length > 0) && (
+                <div>
+                  <div className="flex justify-between items-center mb-3">
+                    <h2 className="text-[13px] text-muted-foreground">Outros fluidos</h2>
+                    <button onClick={() => setTab("fluidos")} className="text-[13px] text-primary font-medium">Detalhes</button>
+                  </div>
+                  <div className="space-y-0 divide-y divide-foreground/5">
+                    {cambio.map((c, i) => (
+                      <div key={i} className="flex justify-between items-center py-3">
+                        <div>
+                          <p className="text-[14px] font-medium capitalize">Cambio {c.tipo}</p>
+                          <p className="text-[12px] text-muted-foreground">{c.especificacao || c.fluido || ""}</p>
+                        </div>
+                        {c.capacidade_litros && <span className="text-[13px] font-semibold">{c.capacidade_litros}L</span>}
+                      </div>
+                    ))}
+                    {fluidos.map((f, i) => (
+                      <div key={i} className="flex justify-between items-center py-3">
+                        <div>
+                          <p className="text-[14px] font-medium capitalize">{String(f.tipo).replace("_", " ")}</p>
+                          <p className="text-[12px] text-muted-foreground">{f.especificacao || f.fluido || ""}</p>
+                        </div>
+                        {f.capacidade_litros && <span className="text-[13px] font-semibold">{f.capacidade_litros}L</span>}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* OLEOS — todos os produtos */}
+          {tab === "oleos" && (
+            <div>
+              {specOem && (
+                <div className="rounded-2xl bg-primary/5 p-4 mb-5">
+                  <p className="text-[12px] text-primary font-medium">Especificacao requerida</p>
+                  <p className="text-[15px] font-semibold mt-0.5">{specOem.viscosidade} — {specOem.oem_aprovacao}</p>
+                </div>
+              )}
+              {produtos.length === 0 ? (
+                <p className="text-center text-muted-foreground py-16">Produtos nao mapeados</p>
+              ) : (
+                <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
+                  {produtos.map((p, i) => (
+                    <div key={i} className="rounded-2xl bg-foreground/[0.03] overflow-hidden group cursor-pointer">
+                      <div className="h-32 bg-gradient-to-br from-foreground/[0.04] to-foreground/[0.02] flex items-center justify-center">
+                        {p.imagem_url ? (
+                          <img src={p.imagem_url} alt={p.marca} className="h-24 object-contain" />
+                        ) : (
+                          <div className="h-18 w-10 rounded bg-foreground/[0.04]" />
+                        )}
+                      </div>
+                      <div className="p-3">
+                        <p className="text-[11px] text-muted-foreground">{p.marca}</p>
+                        <p className="text-[14px] font-medium leading-tight mt-0.5 group-hover:text-primary transition-colors">{p.nome_produto}</p>
+                        <p className="text-[12px] text-muted-foreground/60 mt-1.5">{p.viscosidade} · {p.tipo_base}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* FILTROS */}
+          {tab === "filtros" && (
+            <div className="space-y-5">
+              {filtrosCrossref.length === 0 ? (
+                <p className="text-center text-muted-foreground py-16">Dados nao disponiveis</p>
+              ) : (
+                filtrosCrossref.map((fc, i) => (
+                  <div key={i}>
+                    <div className="flex justify-between items-center mb-3">
+                      <h3 className="text-[14px] font-semibold capitalize">Filtro de {fc.tipo_filtro}</h3>
+                      {fc.oem_codigo && <span className="text-[11px] text-muted-foreground font-mono">OEM {fc.oem_codigo}</span>}
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 lg:grid-cols-3">
+                      {["tecfil", "mann", "wega", "fram", "mahle"].map((brand) => {
+                        const code = fc[brand];
+                        if (!code) return null;
+                        return (
+                          <div key={brand} className="rounded-xl bg-foreground/[0.03] p-3.5 group cursor-pointer hover:bg-foreground/[0.06] transition-colors">
+                            <p className="text-[11px] text-muted-foreground capitalize">{brand}</p>
+                            <p className="text-[15px] font-bold text-primary mt-0.5">{code}</p>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+
+          {/* FLUIDOS */}
+          {tab === "fluidos" && (
+            <div className="space-y-6">
+              {o.viscosidade_sae && (
+                <Section title="Oleo motor">
+                  <Row label="SAE" value={o.viscosidade_sae} />
+                  {o.categoria_api && <Row label="API" value={o.categoria_api} />}
+                  {o.aprovacao_oem && <Row label="OEM" value={o.aprovacao_oem} />}
+                  {o.tipo_base && <Row label="Base" value={o.tipo_base} />}
+                  {o.capacidade_com_filtro_litros && <Row label="Capacidade" value={`${o.capacidade_com_filtro_litros}L`} />}
+                  {o.intervalo_troca_km && <Row label="Troca" value={`${Number(o.intervalo_troca_km).toLocaleString()} km`} />}
+                </Section>
+              )}
+              {cambio.map((c, i) => (
+                <Section key={i} title={`Cambio ${c.tipo}`}>
+                  {c.fluido && <Row label="Fluido" value={c.fluido} />}
+                  {c.viscosidade && <Row label="Viscosidade" value={c.viscosidade} />}
+                  {c.especificacao && <Row label="Spec" value={c.especificacao} />}
+                  {c.capacidade_litros && <Row label="Capacidade" value={`${c.capacidade_litros}L`} />}
+                  {c.intervalo_troca_km && <Row label="Troca" value={`${Number(c.intervalo_troca_km).toLocaleString()} km`} />}
+                </Section>
+              ))}
+              {fluidos.map((f, i) => (
+                <Section key={i} title={String(f.tipo).replace("_", " ")}>
+                  {(f.fluido || f.especificacao) && <Row label="Tipo" value={f.especificacao || f.fluido} />}
+                  {f.capacidade_litros && <Row label="Capacidade" value={`${f.capacidade_litros}L`} />}
+                  {f.concentracao && <Row label="Proporcao" value={f.concentracao} />}
+                </Section>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
       <BottomNav />
     </>
   );
 }
 
-function Section({ title, subtitle, children }: { title: string; subtitle?: string; children: React.ReactNode }) {
+function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div>
-      <div className="flex items-baseline justify-between mb-3">
-        <h3 className="text-sm font-semibold capitalize">{title}</h3>
-        {subtitle && <span className="text-xs text-muted-foreground font-mono">{subtitle}</span>}
-      </div>
-      <div className="space-y-0">{children}</div>
+      <h3 className="text-[14px] font-semibold capitalize mb-3">{title}</h3>
+      <div className="rounded-2xl bg-foreground/[0.03] divide-y divide-foreground/5 overflow-hidden">{children}</div>
     </div>
   );
 }
 
-function Row({ label, value, highlight }: { label: string; value: string; highlight?: boolean }) {
+function Row({ label, value }: { label: string; value: string }) {
   return (
-    <div className="flex justify-between items-start py-2.5 border-b border-foreground/[0.03] last:border-0">
+    <div className="flex justify-between items-start px-4 py-3">
       <span className="text-[13px] text-muted-foreground">{label}</span>
-      <span className={`text-[13px] text-right ml-4 max-w-[60%] ${highlight ? "font-semibold text-primary" : "font-medium"}`}>{value}</span>
+      <span className="text-[13px] font-medium text-right ml-4 max-w-[60%]">{value}</span>
     </div>
   );
 }
