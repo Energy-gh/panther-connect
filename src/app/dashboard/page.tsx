@@ -133,7 +133,16 @@ export default function DashboardPage() {
     setPlacaInput("");
   }
 
-  if (!ready) return <div className="flex h-screen items-center justify-center"><div className="h-5 w-5 rounded-full border-2 border-foreground/20 border-t-foreground animate-spin" /></div>;
+  if (!ready) return (
+    <div className="mx-auto max-w-lg px-5 py-6">
+      <div className="flex gap-4 pb-6">
+        {[...Array(5)].map((_, i) => <div key={i} className="flex flex-col items-center gap-1.5 shrink-0"><div className="h-16 w-16 rounded-full skeleton-shimmer" /><div className="h-3 w-10 rounded skeleton-shimmer" /></div>)}
+      </div>
+      <div className="h-7 w-52 rounded skeleton-shimmer mb-2" />
+      <div className="h-4 w-72 rounded skeleton-shimmer mb-8" />
+      <div className="space-y-3"><div className="h-[88px] rounded-2xl skeleton-shimmer" /><div className="h-[88px] rounded-2xl skeleton-shimmer" /></div>
+    </div>
+  );
 
   return (
     <div className="mx-auto max-w-lg px-5 py-6 lg:max-w-2xl lg:px-8 lg:py-10">
@@ -141,7 +150,7 @@ export default function DashboardPage() {
       {/* Stories */}
       <div className="flex gap-4 overflow-x-auto pb-6 -mx-5 px-5 scrollbar-none">
         {stories.map((s) => (
-          <button key={s.brand} onClick={() => { setActiveStory(s); setSlideIndex(0); }} className="flex flex-col items-center gap-1.5 shrink-0 group">
+          <button key={s.brand} onClick={() => { setActiveStory(s); setSlideIndex(0); }} className="flex flex-col items-center gap-1.5 shrink-0 group pressable">
             <div className="h-16 w-16 rounded-full p-[2px]" style={{ background: `linear-gradient(135deg, ${s.color}, ${s.color}88)` }}>
               <div className="h-full w-full rounded-full bg-background flex items-center justify-center">
                 <span className="text-[10px] font-bold text-muted-foreground group-hover:text-foreground transition-colors">{s.brand.slice(0, 2).toUpperCase()}</span>
@@ -188,13 +197,13 @@ export default function DashboardPage() {
 
       {/* HOME — dois CTAs */}
       {mode === "home" && (
-        <div className="mt-4">
+        <div className="mt-4 page-enter">
           <h1 className="text-2xl font-bold mb-2">Encontre as especificacoes</h1>
           <p className="text-sm text-muted-foreground mb-8">Descubra o oleo, filtros e fluidos corretos para seu veiculo.</p>
 
-          <div className="space-y-3">
+          <div className="space-y-3 animate-stagger">
             <button onClick={() => setMode("placa")}
-              className="w-full flex items-center gap-4 p-5 rounded-2xl bg-foreground/[0.03] hover:bg-foreground/[0.06] transition-colors text-left group">
+              className="w-full flex items-center gap-4 p-5 rounded-2xl bg-foreground/[0.03] hover:bg-foreground/[0.06] transition-colors text-left group pressable">
               <div className="h-12 w-12 rounded-xl bg-foreground/5 flex items-center justify-center shrink-0 group-hover:bg-foreground/10 transition-colors">
                 <svg className="h-5 w-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h14.25c.621 0 1.125.504 1.125 1.125v3.026a2.999 2.999 0 010 5.198v3.026c0 .621-.504 1.125-1.125 1.125H4.875a1.125 1.125 0 01-1.125-1.125V4.875z" />
@@ -208,7 +217,7 @@ export default function DashboardPage() {
             </button>
 
             <button onClick={() => setMode("veiculo")}
-              className="w-full flex items-center gap-4 p-5 rounded-2xl bg-foreground/[0.03] hover:bg-foreground/[0.06] transition-colors text-left group">
+              className="w-full flex items-center gap-4 p-5 rounded-2xl bg-foreground/[0.03] hover:bg-foreground/[0.06] transition-colors text-left group pressable">
               <div className="h-12 w-12 rounded-xl bg-foreground/5 flex items-center justify-center shrink-0 group-hover:bg-foreground/10 transition-colors">
                 <svg className="h-5 w-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
@@ -226,7 +235,7 @@ export default function DashboardPage() {
 
       {/* BUSCA POR PLACA */}
       {mode === "placa" && (
-        <div className="mt-4">
+        <div className="mt-4 slide-in" key="placa">
           <button onClick={goBack} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-6">
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
             Voltar
@@ -256,7 +265,7 @@ export default function DashboardPage() {
 
       {/* BUSCA POR VEICULO */}
       {mode === "veiculo" && (
-        <div className="mt-4">
+        <div className="mt-4 slide-in" key="veiculo">
           <button onClick={goBack} className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-6">
             <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" /></svg>
             Voltar

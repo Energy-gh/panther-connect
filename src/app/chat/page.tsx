@@ -87,9 +87,9 @@ export default function ChatPage() {
             <div className="flex justify-start">
               <div className="bg-foreground/5 rounded-2xl rounded-bl-md px-4 py-3.5">
                 <div className="flex gap-1.5">
-                  <div className="h-2 w-2 rounded-full bg-muted-foreground/30 animate-bounce" />
-                  <div className="h-2 w-2 rounded-full bg-muted-foreground/30 animate-bounce [animation-delay:150ms]" />
-                  <div className="h-2 w-2 rounded-full bg-muted-foreground/30 animate-bounce [animation-delay:300ms]" />
+                  <div className="h-2 w-2 rounded-full bg-muted-foreground/40 chat-dot" />
+                  <div className="h-2 w-2 rounded-full bg-muted-foreground/40 chat-dot" />
+                  <div className="h-2 w-2 rounded-full bg-muted-foreground/40 chat-dot" />
                 </div>
               </div>
             </div>

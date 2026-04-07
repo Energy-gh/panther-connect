@@ -42,7 +42,13 @@ export default function GaragemPage() {
     load();
   }
 
-  if (loading) return <div className="flex h-screen items-center justify-center"><div className="h-5 w-5 rounded-full border-2 border-foreground/20 border-t-foreground animate-spin" /></div>;
+  if (loading) return (
+    <div className="mx-auto max-w-lg px-5 py-6">
+      <div className="h-7 w-40 rounded skeleton-shimmer mb-6" />
+      <div className="space-y-3">{[...Array(3)].map((_, i) => <div key={i} className="h-20 rounded-2xl skeleton-shimmer" />)}</div>
+      <BottomNav />
+    </div>
+  );
 
   return (
     <>
@@ -71,9 +77,17 @@ export default function GaragemPage() {
         )}
 
         {meusVeiculos.length === 0 ? (
-          <div className="text-center py-16">
-            <p className="text-muted-foreground">Nenhum veiculo adicionado</p>
-            <p className="text-sm text-muted-foreground/60 mt-1">Adicione veiculos para acompanhar manutencoes</p>
+          <div className="text-center py-16 page-enter">
+            <div className="inline-flex h-20 w-20 items-center justify-center rounded-full bg-foreground/[0.03] mb-5">
+              <svg className="h-9 w-9 text-muted-foreground/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M8 17h.01M16 17h.01M3 11l1.5-5A2 2 0 016.4 4h11.2a2 2 0 011.9 1.4L21 11M3 11v6a1 1 0 001 1h1a1 1 0 001-1v-1h12v1a1 1 0 001 1h1a1 1 0 001-1v-6M3 11h18" />
+              </svg>
+            </div>
+            <h3 className="text-[16px] font-semibold mb-1.5">Sua garagem esta vazia</h3>
+            <p className="text-[13px] text-muted-foreground/60 mb-6 max-w-[240px] mx-auto">Adicione seus veiculos para acessar especificacoes rapidamente</p>
+            <button onClick={() => setAddMode(true)} className="h-11 px-6 rounded-xl bg-primary text-primary-foreground text-[13px] font-semibold pressable">
+              + Adicionar primeiro veiculo
+            </button>
           </div>
         ) : (
           <div className="divide-y divide-foreground/5">

@@ -164,3 +164,120 @@
 .snap-start {
   scroll-snap-align: start;
 }
+
+/* ═══════════════════════════════════════════════
+   MICRO-INTERACTIONS & ANIMATIONS
+   Inspired by: Uber, Airbnb, Revolut, Linear
+   ═══════════════════════════════════════════════ */
+
+/* Pressable — tap feedback on every interactive surface */
+.pressable {
+  transition: transform 150ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.pressable:active {
+  transform: scale(0.97);
+}
+
+/* Pressable with lift on hover (desktop) */
+.pressable-lift {
+  transition: transform 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
+              box-shadow 200ms ease;
+}
+.pressable-lift:active {
+  transform: scale(0.97);
+}
+@media (hover: hover) {
+  .pressable-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px -8px rgba(0, 0, 0, 0.4);
+  }
+}
+
+/* Page enter animation */
+@keyframes pageEnter {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.page-enter {
+  animation: pageEnter 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Slide in from right (for mode transitions) */
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.slide-in {
+  animation: slideIn 350ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Staggered list entry — children cascade in */
+@keyframes staggerUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.animate-stagger > * {
+  opacity: 0;
+  animation: staggerUp 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.animate-stagger > *:nth-child(1) { animation-delay: 0ms; }
+.animate-stagger > *:nth-child(2) { animation-delay: 40ms; }
+.animate-stagger > *:nth-child(3) { animation-delay: 80ms; }
+.animate-stagger > *:nth-child(4) { animation-delay: 120ms; }
+.animate-stagger > *:nth-child(5) { animation-delay: 160ms; }
+.animate-stagger > *:nth-child(6) { animation-delay: 200ms; }
+.animate-stagger > *:nth-child(7) { animation-delay: 240ms; }
+.animate-stagger > *:nth-child(8) { animation-delay: 280ms; }
+.animate-stagger > *:nth-child(9) { animation-delay: 320ms; }
+.animate-stagger > *:nth-child(10) { animation-delay: 360ms; }
+
+/* Content reveal — fade in after loading */
+@keyframes contentReveal {
+  from { opacity: 0; filter: blur(4px); }
+  to { opacity: 1; filter: blur(0); }
+}
+.content-reveal {
+  animation: contentReveal 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Shimmer skeleton — premium loading effect */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    oklch(1 0 0 / 0.03) 25%,
+    oklch(1 0 0 / 0.06) 50%,
+    oklch(1 0 0 / 0.03) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 8px;
+}
+
+/* Chat typing dots — smoother than bounce */
+@keyframes chatDot {
+  0%, 80%, 100% { transform: scale(0.6); opacity: 0.3; }
+  40% { transform: scale(1); opacity: 1; }
+}
+.chat-dot {
+  animation: chatDot 1.4s ease-in-out infinite;
+}
+.chat-dot:nth-child(2) { animation-delay: 0.16s; }
+.chat-dot:nth-child(3) { animation-delay: 0.32s; }
+
+/* Story progress bar */
+@keyframes storyProgress {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
+/* Hide scrollbar but keep scroll */
+.scrollbar-none::-webkit-scrollbar { display: none; }
+.scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Safe area for iOS notch */
+.safe-top { padding-top: env(safe-area-inset-top); }
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }

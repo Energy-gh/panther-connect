@@ -18,11 +18,12 @@ export default function BottomNav() {
         {tabs.map((tab) => {
           const active = pathname === tab.href || (tab.href !== "/dashboard" && pathname.startsWith(tab.href));
           return (
-            <Link key={tab.href} href={tab.href} className="flex flex-1 flex-col items-center gap-0.5 py-3" aria-current={active ? "page" : undefined}>
-              <svg className={`h-5 w-5 ${active ? "text-foreground" : "text-muted-foreground/60"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={active ? 2 : 1.5} aria-hidden="true">
+            <Link key={tab.href} href={tab.href} className="flex flex-1 flex-col items-center gap-0.5 py-3 relative pressable" aria-current={active ? "page" : undefined}>
+              {active && <div className="absolute top-1.5 h-1 w-1 rounded-full bg-primary" />}
+              <svg className={`h-5 w-5 transition-colors duration-200 ${active ? "text-foreground" : "text-muted-foreground/50"}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={active ? 2 : 1.5} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" d={tab.icon} />
               </svg>
-              <span className={`text-[11px] ${active ? "text-foreground font-medium" : "text-muted-foreground/60"}`}>{tab.label}</span>
+              <span className={`text-[11px] transition-colors duration-200 ${active ? "text-foreground font-medium" : "text-muted-foreground/50"}`}>{tab.label}</span>
             </Link>
           );
         })}

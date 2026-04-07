@@ -53,7 +53,22 @@ export default function VeiculoPage({ params }: { params: Promise<{ id: string }
     setLoading(false);
   }
 
-  if (loading) return <div className="flex h-screen items-center justify-center"><div className="h-5 w-5 rounded-full border-2 border-foreground/20 border-t-foreground animate-spin" /></div>;
+  if (loading) return (
+    <div className="pb-24">
+      <div className="px-5 pt-5 pb-6">
+        <div className="h-10 w-10 rounded-full skeleton-shimmer mb-4" />
+        <div className="h-8 w-56 rounded skeleton-shimmer mb-2" />
+        <div className="h-5 w-40 rounded skeleton-shimmer mb-4" />
+        <div className="flex gap-2">{[...Array(4)].map((_, i) => <div key={i} className="h-9 w-24 rounded-full skeleton-shimmer" />)}</div>
+      </div>
+      <div className="flex gap-4 px-5 py-3 border-b border-foreground/5">{[...Array(4)].map((_, i) => <div key={i} className="h-5 w-16 rounded skeleton-shimmer" />)}</div>
+      <div className="px-5 py-5 space-y-4">
+        <div className="grid grid-cols-2 gap-3"><div className="h-32 col-span-2 rounded-2xl skeleton-shimmer" /><div className="h-24 rounded-2xl skeleton-shimmer" /><div className="h-24 rounded-2xl skeleton-shimmer" /></div>
+        <div className="flex gap-3">{[...Array(3)].map((_, i) => <div key={i} className="h-48 w-40 shrink-0 rounded-2xl skeleton-shimmer" />)}</div>
+      </div>
+      <BottomNav />
+    </div>
+  );
   if (!v) return <div className="flex h-screen items-center justify-center text-muted-foreground">Veiculo nao encontrado</div>;
 
   const o = oleo[0] || {};
@@ -73,7 +88,7 @@ export default function VeiculoPage({ params }: { params: Promise<{ id: string }
 
   return (
     <>
-      <div className="pb-24 lg:pb-0">
+      <div className="pb-24 lg:pb-0 content-reveal">
         {/* Hero header — full width, como iFood mostra o restaurante */}
         <div className="relative bg-gradient-to-b from-foreground/[0.04] to-background px-5 pt-5 pb-6 lg:px-8">
           <Link href="/dashboard" className="inline-flex items-center justify-center h-9 w-9 rounded-full bg-foreground/5 hover:bg-foreground/10 transition-colors mb-4">
@@ -158,7 +173,7 @@ export default function VeiculoPage({ params }: { params: Promise<{ id: string }
                   </div>
                   <div className="flex gap-3 overflow-x-auto -mx-5 px-5 pb-2 scrollbar-none">
                     {produtos.slice(0, 6).map((p, i) => (
-                      <div key={i} className="shrink-0 w-40 rounded-2xl bg-foreground/[0.03] overflow-hidden group cursor-pointer">
+                      <div key={i} className="shrink-0 w-40 rounded-2xl bg-foreground/[0.03] overflow-hidden group cursor-pointer pressable-lift">
                         <div className="h-28 bg-gradient-to-br from-foreground/[0.04] to-foreground/[0.02] flex items-center justify-center">
                           {p.imagem_url ? (
                             <img src={p.imagem_url} alt={p.marca} className="h-20 object-contain" />
@@ -252,7 +267,7 @@ export default function VeiculoPage({ params }: { params: Promise<{ id: string }
               ) : (
                 <div className="grid grid-cols-2 gap-3 lg:grid-cols-3">
                   {produtos.map((p, i) => (
-                    <div key={i} className="rounded-2xl bg-foreground/[0.03] overflow-hidden group cursor-pointer">
+                    <div key={i} className="rounded-2xl bg-foreground/[0.03] overflow-hidden group cursor-pointer pressable-lift">
                       <div className="h-32 bg-gradient-to-br from-foreground/[0.04] to-foreground/[0.02] flex items-center justify-center">
                         {p.imagem_url ? (
                           <img src={p.imagem_url} alt={p.marca} className="h-24 object-contain" />
@@ -289,7 +304,7 @@ export default function VeiculoPage({ params }: { params: Promise<{ id: string }
                         const code = fc[brand];
                         if (!code) return null;
                         return (
-                          <div key={brand} className="rounded-xl bg-foreground/[0.03] p-3.5 group cursor-pointer hover:bg-foreground/[0.06] transition-colors">
+                          <div key={brand} className="rounded-xl bg-foreground/[0.03] p-3.5 group cursor-pointer hover:bg-foreground/[0.06] transition-colors pressable">
                             <p className="text-[11px] text-muted-foreground capitalize">{brand}</p>
                             <p className="text-[15px] font-bold text-primary mt-0.5">{code}</p>
                           </div>
