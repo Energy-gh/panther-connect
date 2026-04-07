@@ -13,33 +13,20 @@ const navItems = [
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-
   return (
     <div className="flex min-h-screen">
-      {/* Desktop Sidebar */}
-      <aside className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 border-r border-border/50 bg-card/50">
-        {/* Brand */}
-        <div className="flex h-16 items-center gap-2.5 px-6 border-b border-border/50">
-          <div className="h-6 w-1 rounded-full bg-primary" />
-          <span className="text-base font-bold tracking-tight">Panther Connect</span>
+      {/* Desktop Sidebar — clean, no borders */}
+      <aside className="hidden lg:flex lg:w-56 lg:flex-col lg:fixed lg:inset-y-0 bg-card/30">
+        <div className="flex h-14 items-center px-5">
+          <span className="text-sm font-semibold">Panther Connect</span>
         </div>
-
-        {/* Nav */}
-        <nav className="flex-1 px-3 py-4 space-y-1" aria-label="Menu principal">
+        <nav className="flex-1 px-3 py-2 space-y-0.5">
           {navItems.map((item) => {
             const active = pathname === item.href || (item.href !== "/dashboard" && pathname.startsWith(item.href));
             return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                  active
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:bg-accent hover:text-foreground"
-                }`}
-                aria-current={active ? "page" : undefined}
-              >
-                <svg className="h-4.5 w-4.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={active ? 2 : 1.5} aria-hidden="true">
+              <Link key={item.href} href={item.href}
+                className={`flex items-center gap-2.5 rounded-lg px-3 py-2 text-[13px] transition-colors ${active ? "bg-foreground/5 text-foreground font-medium" : "text-muted-foreground hover:text-foreground"}`}>
+                <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={active ? 2 : 1.5} aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" d={item.icon} />
                 </svg>
                 {item.label}
@@ -47,21 +34,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             );
           })}
         </nav>
-
-        {/* Footer */}
-        <div className="px-6 py-4 border-t border-border/50">
-          <p className="text-[10px] text-muted-foreground/60 uppercase tracking-widest">Panther Connect v1.0</p>
-        </div>
       </aside>
-
-      {/* Main content */}
-      <main className="flex-1 lg:pl-64">
-        <div className="pb-20 lg:pb-0">
-          {children}
-        </div>
+      <main className="flex-1 lg:pl-56">
+        <div className="pb-20 lg:pb-0">{children}</div>
       </main>
-
-      {/* Mobile Bottom Nav */}
       <BottomNav />
     </div>
   );

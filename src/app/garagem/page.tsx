@@ -4,22 +4,16 @@ import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
 import BottomNav from "@/components/BottomNav";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type MV = any;
+type A = any;
 
 export default function GaragemPage() {
-  const [meusVeiculos, setMeusVeiculos] = useState<MV[]>([]);
-  const [veiculosAll, setVeiculosAll] = useState<{ id: number; marca: string; modelo: string; ano_de: number }[]>([]);
+  const [meusVeiculos, setMeusVeiculos] = useState<A[]>([]);
+  const [veiculosAll, setVeiculosAll] = useState<A[]>([]);
   const [addMode, setAddMode] = useState(false);
-  const [selVeiculoId, setSelVeiculoId] = useState("");
+  const [selId, setSelId] = useState("");
   const [apelido, setApelido] = useState("");
   const [placa, setPlaca] = useState("");
   const [km, setKm] = useState("");
@@ -39,78 +33,64 @@ export default function GaragemPage() {
     setLoading(false);
   }
 
-  async function addVeiculo() {
-    if (!selVeiculoId) return;
+  async function add() {
+    if (!selId) return;
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return;
-    await supabase.from("meus_veiculos").insert({ user_id: user.id, veiculo_id: parseInt(selVeiculoId), apelido: apelido || null, placa: placa || null, km_atual: km ? parseInt(km) : null });
-    setAddMode(false); setApelido(""); setPlaca(""); setKm(""); setSelVeiculoId("");
+    await supabase.from("meus_veiculos").insert({ user_id: user.id, veiculo_id: parseInt(selId), apelido: apelido || null, placa: placa || null, km_atual: km ? parseInt(km) : null });
+    setAddMode(false); setApelido(""); setPlaca(""); setKm(""); setSelId("");
     load();
   }
 
-  if (loading) return (
-    <div className="mx-auto max-w-3xl px-4 py-8 space-y-4">
-      <Skeleton className="h-8 w-40" />
-      <Skeleton className="h-24 w-full rounded-xl" />
-      <Skeleton className="h-24 w-full rounded-xl" />
-      <BottomNav />
-    </div>
-  );
+  if (loading) return <div className="flex h-screen items-center justify-center"><div className="h-5 w-5 rounded-full border-2 border-foreground/20 border-t-foreground animate-spin" /></div>;
 
   return (
     <>
-      <div className="mx-auto max-w-3xl px-4 py-6 pb-24 lg:px-8 lg:pb-8">
+      <div className="mx-auto max-w-lg px-5 py-6 pb-24 lg:max-w-2xl lg:px-8 lg:pb-8">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-xl font-bold tracking-tight">Minha Garagem</h1>
-          <Button size="sm" onClick={() => setAddMode(!addMode)}>{addMode ? "Cancelar" : "+ Adicionar"}</Button>
+          <h1 className="text-xl font-bold">Minha Garagem</h1>
+          <button onClick={() => setAddMode(!addMode)} className="text-sm text-primary font-medium">
+            {addMode ? "Cancelar" : "+ Adicionar"}
+          </button>
         </div>
 
         {addMode && (
-          <Card className="mb-5">
-            <CardContent className="py-4 space-y-3">
-              <div className="space-y-1.5">
-                <Label className="text-xs uppercase tracking-widest text-muted-foreground">Veiculo</Label>
-                <select value={selVeiculoId} onChange={(e) => setSelVeiculoId(e.target.value)}
-                  className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm" aria-label="Selecionar veiculo">
-                  <option value="">Selecione o veiculo</option>
-                  {veiculosAll.map((v) => <option key={v.id} value={v.id}>{v.marca} {v.modelo} {v.ano_de || ""}</option>)}
-                </select>
-              </div>
-              <div className="grid grid-cols-3 gap-2">
-                <div className="space-y-1"><Label className="text-[10px]">Apelido</Label><Input value={apelido} onChange={(e) => setApelido(e.target.value)} placeholder="Ex: Carro casa" /></div>
-                <div className="space-y-1"><Label className="text-[10px]">Placa</Label><Input value={placa} onChange={(e) => setPlaca(e.target.value.toUpperCase())} placeholder="ABC1D23" className="uppercase font-mono" /></div>
-                <div className="space-y-1"><Label className="text-[10px]">KM Atual</Label><Input type="number" value={km} onChange={(e) => setKm(e.target.value)} placeholder="0" /></div>
-              </div>
-              <Button onClick={addVeiculo} disabled={!selVeiculoId} className="w-full">Salvar</Button>
-            </CardContent>
-          </Card>
+          <div className="mb-6 space-y-3">
+            <select value={selId} onChange={(e) => setSelId(e.target.value)}
+              className="w-full h-12 appearance-none rounded-xl bg-foreground/5 px-4 text-sm focus:outline-none focus:ring-2 focus:ring-foreground/10" aria-label="Veiculo">
+              <option value="">Selecione o veiculo</option>
+              {veiculosAll.map((v: A) => <option key={v.id} value={v.id}>{v.marca} {v.modelo} {v.ano_de || ""}</option>)}
+            </select>
+            <div className="grid grid-cols-3 gap-2">
+              <input value={apelido} onChange={(e) => setApelido(e.target.value)} placeholder="Apelido" className="h-11 rounded-xl bg-foreground/5 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-foreground/10" />
+              <input value={placa} onChange={(e) => setPlaca(e.target.value.toUpperCase())} placeholder="Placa" className="h-11 rounded-xl bg-foreground/5 px-3 text-sm font-mono uppercase focus:outline-none focus:ring-2 focus:ring-foreground/10" />
+              <input type="number" value={km} onChange={(e) => setKm(e.target.value)} placeholder="KM" className="h-11 rounded-xl bg-foreground/5 px-3 text-sm focus:outline-none focus:ring-2 focus:ring-foreground/10" />
+            </div>
+            <button onClick={add} disabled={!selId} className="w-full h-12 rounded-xl bg-foreground text-background text-sm font-semibold disabled:opacity-30">Salvar</button>
+          </div>
         )}
 
         {meusVeiculos.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-border p-12 text-center">
-            <div className="text-3xl mb-3 opacity-30">🚗</div>
-            <p className="text-sm font-medium text-muted-foreground">Sua garagem esta vazia</p>
-            <p className="text-xs text-muted-foreground/60 mt-1">Adicione seus veiculos para acompanhar manutencoes</p>
+          <div className="text-center py-16">
+            <p className="text-muted-foreground">Nenhum veiculo adicionado</p>
+            <p className="text-sm text-muted-foreground/60 mt-1">Adicione veiculos para acompanhar manutencoes</p>
           </div>
         ) : (
-          <div className="space-y-3">
-            {meusVeiculos.map((mv: MV) => (
-              <Link key={mv.id} href={`/veiculo/${mv.veiculos?.id}`}>
-                <Card className="hover:border-primary/40 transition-colors cursor-pointer mb-2">
-                  <CardContent className="py-4 flex items-center justify-between">
-                    <div>
-                      <p className="font-semibold capitalize">{mv.veiculos?.marca} {mv.veiculos?.modelo}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        {mv.veiculos?.ano_de && <span className="text-xs text-primary font-medium">{mv.veiculos.ano_de}</span>}
-                        {mv.apelido && <Badge variant="outline" className="text-[10px]">{mv.apelido}</Badge>}
-                      </div>
-                    </div>
-                    <div className="text-right space-y-1">
-                      {mv.placa && <Badge variant="secondary" className="font-mono text-[10px]">{mv.placa}</Badge>}
-                      {mv.km_atual && <p className="text-[10px] text-muted-foreground">{Number(mv.km_atual).toLocaleString()} km</p>}
-                    </div>
-                  </CardContent>
-                </Card>
+          <div className="divide-y divide-foreground/5">
+            {meusVeiculos.map((mv: A) => (
+              <Link key={mv.id} href={`/veiculo/${mv.veiculos?.id}`} className="flex items-center justify-between py-4 group">
+                <div>
+                  <p className="text-[15px] font-medium capitalize group-hover:text-primary transition-colors">
+                    {mv.veiculos?.marca} {mv.veiculos?.modelo}
+                    {mv.veiculos?.ano_de && <span className="text-muted-foreground font-normal ml-1.5">{mv.veiculos.ano_de}</span>}
+                  </p>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    {mv.apelido && <span className="text-[13px] text-muted-foreground">{mv.apelido}</span>}
+                    {mv.placa && <span className="text-[11px] font-mono text-muted-foreground/60 bg-foreground/5 px-1.5 py-0.5 rounded">{mv.placa}</span>}
+                    {mv.km_atual && <span className="text-[11px] text-muted-foreground/60">{Number(mv.km_atual).toLocaleString()} km</span>}
+                  </div>
+                </div>
+                <svg className="h-4 w-4 text-muted-foreground/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
               </Link>
             ))}
           </div>
