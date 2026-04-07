@@ -164,6 +164,79 @@ export default function VeiculoPage({ params }: { params: Promise<{ id: string }
                 </div>
               )}
 
+              {/* O que fazer — checklist de acao */}
+              {(o.viscosidade_sae || filtrosCrossref.length > 0) && (
+                <div>
+                  <h2 className="text-[13px] text-muted-foreground mb-3">O que fazer neste veiculo</h2>
+                  <div className="space-y-2">
+                    {o.viscosidade_sae && (
+                      <div className="flex items-center gap-3 p-3.5 rounded-xl bg-foreground/[0.03]">
+                        <div className="h-8 w-8 rounded-lg bg-amber-500/10 flex items-center justify-center shrink-0">
+                          <svg className="h-4 w-4 text-amber-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3M14.25 3.104c.251.023.501.05.75.082M19.8 15.3l-1.57.393A9.065 9.065 0 0112 15a9.065 9.065 0 00-6.23.693L5 14.5" /></svg>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-[13px] font-medium">Oleo motor {o.viscosidade_sae}</p>
+                          <p className="text-[11px] text-muted-foreground">{o.capacidade_com_filtro_litros ? `${o.capacidade_com_filtro_litros}L com filtro` : ""}</p>
+                        </div>
+                        <button onClick={() => setTab("oleos")} className="text-[12px] text-primary font-medium pressable">Ver marcas</button>
+                      </div>
+                    )}
+                    {filtrosCrossref.slice(0, 3).map((fc, i) => (
+                      <div key={i} className="flex items-center gap-3 p-3.5 rounded-xl bg-foreground/[0.03]">
+                        <div className="h-8 w-8 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
+                          <svg className="h-4 w-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 3c2.755 0 5.455.232 8.083.678.533.09.917.556.917 1.096v1.044a2.25 2.25 0 01-.659 1.591l-5.432 5.432a2.25 2.25 0 00-.659 1.591v2.927a2.25 2.25 0 01-1.244 2.013L9.75 21v-6.568a2.25 2.25 0 00-.659-1.591L3.659 7.409A2.25 2.25 0 013 5.818V4.774c0-.54.384-1.006.917-1.096A48.32 48.32 0 0112 3z" /></svg>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-[13px] font-medium capitalize">Filtro de {fc.tipo_filtro}</p>
+                          <p className="text-[11px] text-muted-foreground">{fc.tecfil || fc.mann || fc.wega || ""}</p>
+                        </div>
+                        <button onClick={() => setTab("filtros")} className="text-[12px] text-primary font-medium pressable">Ver codigos</button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Salvar na garagem + Compartilhar */}
+              <div className="flex gap-2">
+                <Link href="/garagem" className="flex-1 flex items-center justify-center gap-2 h-11 rounded-xl bg-foreground/[0.03] hover:bg-foreground/[0.06] text-[13px] font-medium transition-colors pressable">
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                  Salvar na garagem
+                </Link>
+                <button onClick={() => { navigator.clipboard.writeText(`${v.marca} ${v.modelo} ${v.ano_de}: ${o.viscosidade_sae || ""} ${o.aprovacao_oem || ""}`); }}
+                  className="flex items-center justify-center gap-2 h-11 px-4 rounded-xl bg-foreground/[0.03] hover:bg-foreground/[0.06] text-[13px] font-medium transition-colors pressable">
+                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M7.217 10.907a2.25 2.25 0 100 2.186m0-2.186c.18.324.283.696.283 1.093s-.103.77-.283 1.093m0-2.186l9.566-5.314m-9.566 7.5l9.566 5.314m0 0a2.25 2.25 0 103.935 2.186 2.25 2.25 0 00-3.935-2.186zm0-12.814a2.25 2.25 0 103.933-2.185 2.25 2.25 0 00-3.933 2.185z" /></svg>
+                  Compartilhar
+                </button>
+              </div>
+
+              {/* Banner servicos — soft sell */}
+              <div className="p-4 rounded-2xl bg-gradient-to-br from-primary/[0.08] via-transparent to-transparent">
+                <div className="flex items-start gap-3">
+                  <div className="h-10 w-10 rounded-xl bg-primary/15 flex items-center justify-center shrink-0">
+                    <svg className="h-5 w-5 text-primary" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/></svg>
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-[14px] font-semibold">Envie um orcamento</p>
+                    <p className="text-[12px] text-muted-foreground mt-0.5">Crie um orcamento profissional com estes itens e envie pelo WhatsApp.</p>
+                    <Link href="/orcamento" className="inline-block mt-2 text-[13px] text-primary font-medium pressable">
+                      Criar orcamento →
+                    </Link>
+                  </div>
+                </div>
+              </div>
+
+              {/* Perguntar ao AI */}
+              <Link href="/chat" className="flex items-center gap-3 p-4 rounded-2xl bg-foreground/[0.03] hover:bg-foreground/[0.06] transition-colors pressable">
+                <div className="h-10 w-10 rounded-xl bg-foreground/5 flex items-center justify-center shrink-0">
+                  <svg className="h-5 w-5 text-muted-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+                </div>
+                <div>
+                  <p className="text-[14px] font-medium">Tem duvidas sobre este carro?</p>
+                  <p className="text-[12px] text-muted-foreground">Pergunte ao assistente Panther</p>
+                </div>
+              </Link>
+
               {/* Produtos — cards visuais estilo iFood */}
               {produtos.length > 0 && (
                 <div>

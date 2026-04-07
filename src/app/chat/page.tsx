@@ -6,18 +6,26 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import BottomNav from "@/components/BottomNav";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type A = any;
+
 interface Msg { role: string; content: string; }
 
+const suggestedPrompts = [
+  "Qual oleo usar no meu carro?",
+  "Diferenca entre sintetico e mineral?",
+  "Quando trocar o filtro de ar?",
+  "Posso misturar oleos diferentes?",
+];
+
 export default function ChatPage() {
-  const [messages, setMessages] = useState<Msg[]>([
-    { role: "assistant", content: "Ola! Posso te ajudar com especificacoes de lubrificantes, filtros e manutencao do seu veiculo." },
-  ]);
+  const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [userId, setUserId] = useState("");
   const [veiculoId, setVeiculoId] = useState<number | null>(null);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [veiculos, setVeiculos] = useState<any[]>([]);
+  const [veiculoLabel, setVeiculoLabel] = useState("");
+  const [showPrompts, setShowPrompts] = useState(true);
   const bottomRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
   const supabase = createClient();
@@ -29,15 +37,36 @@ export default function ChatPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { router.push("/"); return; }
     setUserId(user.id);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data } = await supabase.from("veiculos").select("id, marca, modelo, ano_de").order("marca").limit(50);
-    if (data) setVeiculos(data.map((v: any) => ({ id: v.id, label: `${v.marca} ${v.modelo} ${v.ano_de || ""}` })));
+
+    // Auto-detect user's first car for context
+    const { data: meus } = await supabase
+      .from("meus_veiculos")
+      .select("veiculo_id, veiculos(id, marca, modelo, ano_de)")
+      .eq("user_id", user.id)
+      .limit(1);
+
+    if (meus?.length) {
+      const v = (meus[0] as A).veiculos;
+      setVeiculoId(v.id);
+      const label = `${v.marca} ${v.modelo} ${v.ano_de || ""}`.trim();
+      setVeiculoLabel(label);
+      setMessages([{
+        role: "assistant",
+        content: `Ola! Vi que voce tem um ${label}. Posso te ajudar com especificacoes, manutencao ou qualquer duvida sobre lubrificantes. O que precisa?`,
+      }]);
+    } else {
+      setMessages([{
+        role: "assistant",
+        content: "Ola! Sou o assistente Panther. Posso te ajudar com especificacoes de lubrificantes, filtros e manutencao. Qual seu veiculo?",
+      }]);
+    }
   }
 
-  async function send() {
-    if (!input.trim() || loading) return;
-    const msg = input.trim();
+  async function send(text?: string) {
+    const msg = (text || input).trim();
+    if (!msg || loading) return;
     setInput("");
+    setShowPrompts(false);
     setMessages((p) => [...p, { role: "user", content: msg }]);
     setLoading(true);
     try {
@@ -59,17 +88,15 @@ export default function ChatPage() {
             </Link>
             <div>
               <h1 className="text-[15px] font-semibold">Assistente Panther</h1>
-              <div className="flex items-center gap-1.5">
-                <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                <span className="text-[11px] text-muted-foreground">Online</span>
-              </div>
+              {veiculoLabel && <p className="text-[11px] text-muted-foreground capitalize">{veiculoLabel}</p>}
+              {!veiculoLabel && (
+                <div className="flex items-center gap-1.5">
+                  <div className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  <span className="text-[11px] text-muted-foreground">Online</span>
+                </div>
+              )}
             </div>
           </div>
-          <select value={veiculoId || ""} onChange={(e) => setVeiculoId(e.target.value ? Number(e.target.value) : null)}
-            className="text-[12px] bg-foreground/5 rounded-lg px-2 py-1.5 max-w-[160px] focus:outline-none" aria-label="Veiculo">
-            <option value="">Sem veiculo</option>
-            {veiculos.map((v: any) => <option key={v.id} value={v.id}>{v.label}</option>)}
-          </select>
         </div>
 
         {/* Messages */}
@@ -83,6 +110,19 @@ export default function ChatPage() {
               </div>
             </div>
           ))}
+
+          {/* Suggested prompts — cards clicaveis */}
+          {showPrompts && !loading && (
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              {suggestedPrompts.map((p) => (
+                <button key={p} onClick={() => send(p)}
+                  className="p-3 rounded-xl bg-foreground/[0.03] hover:bg-foreground/[0.06] text-left text-[13px] text-muted-foreground hover:text-foreground transition-colors pressable">
+                  {p}
+                </button>
+              ))}
+            </div>
+          )}
+
           {loading && (
             <div className="flex justify-start">
               <div className="bg-foreground/5 rounded-2xl rounded-bl-md px-4 py-3.5">
@@ -103,8 +143,8 @@ export default function ChatPage() {
             <input value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && send()}
               placeholder="Pergunte sobre lubrificantes..."
               className="flex-1 h-11 rounded-xl bg-foreground/5 px-4 text-sm placeholder:text-muted-foreground/40 focus:outline-none focus:ring-2 focus:ring-foreground/10" />
-            <button onClick={send} disabled={loading || !input.trim()}
-              className="h-11 px-5 rounded-xl bg-foreground text-background text-sm font-medium disabled:opacity-30">
+            <button onClick={() => send()} disabled={loading || !input.trim()}
+              className="h-11 px-5 rounded-xl bg-foreground text-background text-sm font-medium disabled:opacity-30 pressable">
               Enviar
             </button>
           </div>

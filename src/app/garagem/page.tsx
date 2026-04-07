@@ -157,17 +157,27 @@ export default function GaragemPage() {
                       </button>
                     </div>
 
-                    {/* Info bar inferior */}
-                    <div className="flex items-center justify-between px-4 py-3">
-                      <div className="flex items-center gap-3">
-                        {mv.apelido && <span className="text-[13px] text-muted-foreground">{mv.apelido}</span>}
-                        {mv.km_atual && (
-                          <span className="text-[12px] text-muted-foreground/50">{Number(mv.km_atual).toLocaleString()} km</span>
-                        )}
+                    {/* Status + KM bar */}
+                    <div className="px-4 py-3 space-y-2">
+                      {/* Status indicator */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="h-2 w-2 rounded-full bg-emerald-500" />
+                          <span className="text-[12px] text-muted-foreground">Manutencao em dia</span>
+                        </div>
+                        {mv.apelido && <span className="text-[12px] text-muted-foreground/50">{mv.apelido}</span>}
                       </div>
-                      <svg className="h-4 w-4 text-muted-foreground/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                      </svg>
+                      {/* KM + update inline */}
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[13px] font-medium">{mv.km_atual ? `${Number(mv.km_atual).toLocaleString()} km` : "KM nao informado"}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); const newKm = prompt("KM atual:", String(mv.km_atual || "")); if (newKm) { supabase.from("meus_veiculos").update({ km_atual: parseInt(newKm) }).eq("id", mv.id).then(() => load()); } }}
+                            className="text-[11px] text-primary font-medium pressable">Atualizar KM</button>
+                          <svg className="h-4 w-4 text-muted-foreground/30" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </Link>
