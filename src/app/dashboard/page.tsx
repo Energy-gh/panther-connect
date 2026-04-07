@@ -41,6 +41,11 @@ export default function DashboardPage() {
   const [totalVeiculos, setTotalVeiculos] = useState(0);
   const [totalMarcas, setTotalMarcas] = useState(0);
 
+  // Placa search
+  const [placaInput, setPlacaInput] = useState("");
+  const [placaLoading, setPlacaLoading] = useState(false);
+  const [placaResult, setPlacaResult] = useState<string | null>(null);
+
   useEffect(() => {
     checkAuth();
     loadMarcas();
@@ -183,6 +188,54 @@ export default function DashboardPage() {
           <div className="text-lg font-bold text-white">{totalMarcas}</div>
           <div className="text-[10px] text-slate-500 uppercase">Marcas</div>
         </div>
+      </div>
+
+      {/* Busca por Placa */}
+      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-4 mb-4">
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <input
+              type="text"
+              value={placaInput}
+              onChange={(e) => setPlacaInput(e.target.value.toUpperCase())}
+              maxLength={7}
+              placeholder="Digite a placa (ABC1D23)"
+              className="w-full bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 text-sm text-white uppercase font-mono tracking-wider placeholder-slate-500 focus:border-indigo-500 focus:outline-none"
+            />
+          </div>
+          <button
+            onClick={async () => {
+              if (placaInput.length < 7) return;
+              setPlacaLoading(true);
+              setPlacaResult(null);
+              try {
+                const res = await fetch("/api/placa", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ placa: placaInput }),
+                });
+                const data = await res.json();
+                if (data.error) {
+                  setPlacaResult(data.error);
+                } else if (data.veiculo_id) {
+                  router.push(`/veiculo/${data.veiculo_id}`);
+                } else {
+                  setPlacaResult(`${data.marca || ""} ${data.modelo || ""} ${data.ano || ""} — Use a busca abaixo para encontrar as especificacoes.`);
+                }
+              } catch {
+                setPlacaResult("Erro na consulta. Tente usar a busca manual abaixo.");
+              }
+              setPlacaLoading(false);
+            }}
+            disabled={placaInput.length < 7 || placaLoading}
+            className="bg-indigo-600 hover:bg-indigo-700 disabled:bg-slate-700 text-white rounded-lg px-4 text-sm font-medium transition-colors whitespace-nowrap"
+          >
+            {placaLoading ? "..." : "Buscar Placa"}
+          </button>
+        </div>
+        {placaResult && (
+          <p className="text-xs text-amber-400 mt-2 px-1">{placaResult}</p>
+        )}
       </div>
 
       {/* Guia de Aplicacoes - Cascading Form */}
